@@ -1,0 +1,50 @@
+\begin{thebibliography}{1}
+
+\bibitem{rfc5737}
+J.~Arkko, M.~Cotton, and L.~Vegoda.
+\newblock {IPv4 Address Blocks Reserved for Documentation}.
+\newblock RFC 5737 (Informational), January 2010.
+
+\bibitem{rfc3514}
+S.~Bellovin.
+\newblock {The Security Flag in the IPv4 Header}.
+\newblock RFC 3514 (Informational), April 2003.
+
+\bibitem{rfc7011}
+B.~Claise, B.~Trammell, and P.~Aitken.
+\newblock {Specification of the IP Flow Information Export (IPFIX) Protocol for
+  the Exchange of Flow Information}.
+\newblock RFC 7011 (Internet Standard), September 2013.
+
+\bibitem{UsableMTU2018}
+Ana Custura, Gorry Fairhurst, and Iain Learmonth.
+\newblock {Exploring usable path MTU in the Internet}.
+\newblock In {\em Proceedings of the 2018 Network Traffic Measurement and
+  Analysis Conference (TMA '18)}. IEEE, Jun 2018.
+
+\bibitem{rfc5841}
+R.~Hay and W.~Turkal.
+\newblock {TCP Option to Denote Packet Mood}.
+\newblock RFC 5841 (Informational), April 2010.
+
+\bibitem{PAM2013}
+Mirja K{\"u}hlewind, Sebastian Neuner, and Brian Trammell.
+\newblock {On the state of ECN and TCP options on the Internet}.
+\newblock In {\em Proceedings of the Passive and Active Measurement
+  Conference}, pages 135--144, Hong Kong, China, 2013.
+
+\bibitem{PATHspider2016}
+Iain~R. Learmonth, Brian Trammell, Mirja K\"uhlewind, and Gorry Fairhurst.
+\newblock {PATHspider: A tool for active measurement of path transparency}.
+\newblock In {\em Proceedings of the 2016 Applied Networking Research
+  Workshop}, pages 62--64, July 2016.
+
+\bibitem{PAM2015}
+Brian Trammell, Mirja K{\"u}hlewind, Damiano Boppart, Iain Learmonth, Gorry
+  Fairhurst, and Richard Scheffenegger.
+\newblock Enabling internet-wide deployment of explicit congestion
+  notification.
+\newblock In {\em Proceedings of the Passive and Active Measurement
+  Conference}, pages 193--205, New York, USA, 2015.
+
+\end{thebibliography}
