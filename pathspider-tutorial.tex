@@ -1,4 +1,4 @@
-\documentclass[notes]{beamer}
+\documentclass[handout,notes]{beamer}
 
 \usepackage{listings}
 \usepackage{xcolor}
@@ -53,7 +53,7 @@
 \frametitle{Active Measurement of Path Transparency}
 \begin{columns}[T]
   \begin{column}{.65\textwidth}
-    \begin{itemize}
+    \begin{itemize}[<+->]
     \item{Methodology:}
     \begin{enumerate}
     \item{Throw packets at the Internet}
@@ -78,7 +78,7 @@
 \framesubtitle{\textit{ecnspider}}
 \begin{columns}[T]
   \begin{column}{.6\textwidth}
-    \begin{itemize}
+    \begin{itemize}[<+->]
       \item{The original implementation supported by mPlane/RITE}
       \item{Three distinct components:}
       \begin{itemize}
@@ -120,7 +120,7 @@ billing.}
 \framesubtitle{\textit{ecnspider} Results}
 \begin{columns}[T]
   \begin{column}{.65\textwidth}
-    \begin{itemize}
+    \begin{itemize}[<+->]
       \item{ECN negotiation was found to be successful for 56.17\% of hosts
 	    connecting for IPv4, 65.41\% for IPv6, from the Alexa top 1 million
             list~\cite{PAM2015}}
@@ -138,8 +138,9 @@ billing.}
 \end{frame}
 
 \begin{frame}
-\frametitle{PATHspider 1.0\footnote{https://github.com/mami-project/pathspider/tree/1.0.1}}
-\begin{itemize}
+\frametitle{PATHspider 1.0}
+\framesubtitle{https://github.com/mami-project/pathspider/tree/1.0.1}
+\begin{itemize}[<+->]
 \item{Architecture based closely on the original ecnspider}
 \item{Generalised to support more than just ECN}
 \begin{itemize}
@@ -155,7 +156,7 @@ billing.}
 
 \begin{frame}
 \frametitle{Plugin Architecture}
-\begin{itemize}
+\begin{itemize}[<+->]
 \item{The plugin architecture was not as generalised as it could have been}
 \item{Plugin methods:}
 \begin{itemize}
@@ -171,7 +172,7 @@ billing.}
 
 \begin{frame}
 \frametitle{Built-In Flowmeter}
-\begin{itemize}
+\begin{itemize}[<+->]
 \item{PATHspider's built in flow meter is extensible via the plugin architecture}
 \item{Using python-libtrace to dissect packets, any flow property imaginable
       can be reported back based on the raw packets:}
@@ -242,7 +243,7 @@ For a more comprehensive measurement study on the use and impairments to use of 
 \frametitle{PATHspider 2.0}
 \begin{columns}[T]
 \begin{column}{.7\textwidth}
-\begin{itemize}
+\begin{itemize}[<+->]
 \item{Architecture changed to add a flow combiner}
 \item{Generalised to support more than just A/B testing}
 \begin{itemize}
@@ -270,7 +271,7 @@ For a more comprehensive measurement study on the use and impairments to use of 
 
 \begin{frame}
 \frametitle{Plugin Types}
-\begin{itemize}
+\begin{itemize}[<+->]
 \item{Synchronised (traditional ecnspider)}
 \begin{itemize}
 \item{ECN, DSCP}
@@ -297,7 +298,7 @@ For a more comprehensive measurement study on the use and impairments to use of 
 
 \begin{frame}
 \frametitle{Connection Helpers}
-\begin{itemize}
+\begin{itemize}[<+->]
 \item{Instead of writing client code, use the code that already exists}
 \item{In the \texttt{pathspider.helpers} module:}
 \begin{itemize}
@@ -311,27 +312,129 @@ For a more comprehensive measurement study on the use and impairments to use of 
 \end{itemize}
 \end{frame}
 
-\note{\todo{Pointer to the pycURL documentation, and talk about upstreaming
-            CURLOPTs}}
+\note{You can find the pyCURL documentation at
+\url{http://pycurl.io/docs/latest/}. This contains information on all the
+CURLOPTs that are currently available.
+
+During development of PATHspider plugins, we have found that some options that
+exist in the C library are not included in the Python bindings, but we have
+been able to produce patches and upstream these relatively easily. For example:
+\url{https://github.com/pycurl/pycurl/pull/456}.}
 
 \begin{frame}
 \frametitle{Synchronized Plugin}
-\todo{Write this}
+\begin{itemize}
+\item{SynchronizedSpider plugins use \textbf{built-in connection methods} along with
+\textbf{global system configuration} to change the behaviour of the
+connections}
+\item{Configuration functions are at the heart of a SynchronizedSpider plugin}
+\item{Configuration functions may make calls to sysctl or iptables to make
+changes to the way that traffic is generated.}
+\item{One function should be written for each of the configurations and PATHspider
+will ensure that the configurations are set before the corresponding traffic is
+generated. It is the responsibility of plugin authors to ensure that any
+configuration is reset by the next configuration function if that is required}
+\end{itemize}
+\end{frame}
+
+\begin{frame}[fragile]
+\frametitle{Synchronized Plugin}
+\begin{lstlisting}[caption={Configuration Functions for the ECN Plugin}]
+class ECN(SynchronizedSpider, PluggableSpider):
+    def config_no_ecn(self): # pylint: disable=no-self-use
+        """
+        Disables ECN negotiation via sysctl.
+        """
+
+        logger = logging.getLogger('ecn')
+        subprocess.check_call(
+            ['/sbin/sysctl', '-w', 'net.ipv4.tcp_ecn=2'],
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.DEVNULL)
+        logger.debug("Configurator disabled ECN")
+
+    def config_ecn(self): # pylint: disable=no-self-use
+        """
+        Enables ECN negotiation via sysctl.
+        """
+
+        logger = logging.getLogger('ecn')
+        subprocess.check_call(
+            ['/sbin/sysctl', '-w', 'net.ipv4.tcp_ecn=1'],
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.DEVNULL)
+        logger.debug("Configurator enabled ECN")
+
+    configurations = [config_no_ecn, config_ecn]
+\end{lstlisting}
 \end{frame}
 
 \begin{frame}
 \frametitle{Desynchronized Plugin}
-\todo{Write this}
+\begin{itemize}[<+->]
+\item{DesynchronizedSpider plugins modify the connection logic in order to
+change the behaviour of the connections. There is no global state
+synchronisation and so a DesynchronizedSpider can be more efficient than a
+SynchronizedSpider}
+\item{Connection functions are at the heart of a DesynchronizedSpider plugin}
+\item{These use a connection helper (or custom connection logic) to generate
+traffic towards with a target to get a reply from the target}
+\item{One function should be written for each connection to be made, usually
+with at least two functions to provide a baseline followed by an experimental
+connection}
+\end{itemize}
+\end{frame}
+
+\begin{frame}[fragile]
+\frametitle{Desynchronized Plugin}
+\begin{lstlisting}[caption={Connection Functions for the H2 Plugin}]
+class H2(DesynchronizedSpider, PluggableSpider):
+    def conn_no_h2(self, job, config):  # pylint: disable=unused-argument
+        curlopts = {}
+        curlinfos = [pycurl.INFO_HTTP_VERSION]
+        if self.args.connect == "http":
+            return connect_http(self.source, job, self.args.timeout, curlopts, curlinfos)
+        if self.args.connect == "https":
+            return connect_https(self.source, job, self.args.timeout, curlopts, curlinfos)
+        else:
+            raise RuntimeError("Unknown connection mode specified")
+
+    def conn_h2(self, job, config): # pylint: disable=unused-argument
+        curlopts = {pycurl.HTTP_VERSION: pycurl.CURL_HTTP_VERSION_2_0}
+        curlinfos = [pycurl.INFO_HTTP_VERSION]
+        if self.args.connect == "http":
+            return connect_http(self.source, job, self.args.timeout, curlopts, curlinfos)
+        if self.args.connect == "https":
+            return connect_https(self.source, job, self.args.timeout, curlopts, curlinfos)
+        else:
+            raise RuntimeError("Unknown connection mode specified")
+
+    connections = [conn_no_h2, conn_h2]
+\end{lstlisting}
 \end{frame}
 
 \begin{frame}
 \frametitle{Forge Plugin}
-\todo{Write this}
+\begin{itemize}[<+->]
+\item{ForgeSpider plugins use Scapy to send forged packets to targets}
+\item{The heart of a ForgeSpider is the \texttt{forge()} function}
+\item{This function takes two arguments, the job containing the target
+information and the sequence number}
+\item{This function will be called the number of times set in the packets
+metadata variable and seq will be set to the number of times the function has
+been called for this job}
+\end{itemize}
 \end{frame}
 
 \begin{frame}
 \frametitle{Single Plugin}
-\todo{Write this}
+\begin{itemize}[<+->]
+\item{SingleSpider uses the built-in connection helpers to make a single
+connection to the target which is optionally observed by Observer chains}
+\item{This is the simplest model and only requires a \texttt{combine\_flows()}
+function to generate conditions from the connection helper output and flow
+record output from the Observer}
+\end{itemize}
 \end{frame}
 
 \begin{frame}[fragile]
@@ -484,18 +587,17 @@ irl@z:~$ sudo scapy3
 \end{lstlisting}
 \end{frame}
 
-\begin{frame}[fragile]
-\frametitle{Make a Packet}
-\framesubtitle{IPv4 Header - Bonus: Export a Dissection}
-\begin{lstlisting}[caption={Create a PDF Export of a Dissection of the IP Header}]
->>> i.pdfdump()
-\end{lstlisting}
-
-\begin{figure}
-\includegraphics[width=0.7\textwidth]{ip_dissect}
-\caption{PDF Export of IP Header Dissection}
-\end{figure}
-\end{frame}
+%\begin{frame}[fragile]
+%\frametitle{Make a Packet}
+%\framesubtitle{IPv4 Header - Bonus: Export a Dissection}
+%\begin{lstlisting}[caption={Create a PDF Export of a Dissection of the IP Header}]
+%>>> i.pdfdump()
+%\end{lstlisting}
+%\begin{figure}
+%\includegraphics[width=0.7\textwidth]{ip_dissect}
+%\caption{PDF Export of IP Header Dissection}
+%\end{figure}
+%\end{frame}
 
 \begin{frame}[fragile]
 \frametitle{Make a Packet}
@@ -548,11 +650,11 @@ irl@z:~$ sudo scapy3
 \end{lstlisting}
 \end{frame}
 
-\begin{frame}
-\frametitle{Make a Packet}
-\frametitle{Modifying a Packet}
-\todo{Modify a packet}
-\end{frame}
+%\begin{frame}
+%\frametitle{Make a Packet}
+%\frametitle{Modifying a Packet}
+%\todo{Modify a packet}
+%\end{frame}
 
 \begin{frame}[fragile]
 \frametitle{Make a Packet}
@@ -632,10 +734,37 @@ The evil bit is a fictional \textbf{IPv4 packet header field} proposed in RFC 35
 \end{lstlisting}
 \end{frame}
 
-\begin{frame}
+\begin{frame}[fragile]
+\frametitle{PATHspider Plugins}
+\framesubtitle{Download the Evil Bit Demonstration Plugin}
+\begin{lstlisting}[caption={Download the Evil Bit Demonstration Plugin}]
+git clone https://github.com/mami-project/pathspider-evilbit.git
+\end{lstlisting}
+\end{frame}
+
+\begin{frame}[fragile]
 \frametitle{PATHspider Plugins}
 \framesubtitle{Directory Layout}
-\todo{Write this}
+\begin{itemize}
+\item{To get started you will need the required directory layout for PATHspider
+plugins, in this case for the EvilBit plugin:}
+{\footnotesize\begin{verbatim}
+pathspider-evilbit
++-- pathspider
+    +-- __init__.py
+    +-- plugins
+        +-- __init__.py
+        +-- evilbit.py
+\end{verbatim}}
+\item{Inside both \texttt{\_\_init\_\_.py} files, you will need to add the
+following (and only the following):
+\begin{lstlisting}
+from pkgutil import extend_path
+__path__ = extend_path(__path__, __name__)
+\end{lstlisting}}
+\item{Your plugin will be written in \texttt{example.py} and this plugin will be
+discovered automatically when you run PATHspider}
+\end{itemize}
 \end{frame}
 
 \begin{frame}[fragile]
@@ -646,9 +775,9 @@ class EvilBit(ForgeSpider, PluggableSpider):
 
     name = "evilbit"
     description = "Evil bit connectivity testing"
-    version = "0.0.0"
-    chains = [...]
-    connect_supported = [...]
+    version = '0.0.0'
+    chains = [BasicChain, TCPChain, EvilChain]
+    connect_supported = ["tcpsyn"]
     packets = 2
 
     def forge(self, job, seq):
@@ -656,58 +785,41 @@ class EvilBit(ForgeSpider, PluggableSpider):
 \end{lstlisting}
 \end{frame}
 
-\begin{frame}
+\begin{frame}[fragile]
 \frametitle{PATHspider Plugins}
 \framesubtitle{Forging the Packets}
-\todo{Write this}
+\begin{lstlisting}[caption={Creating Packets With and Without the Evil Bit}]
+def forge(self, job, seq):
+    sport = 0
+    while sport < 1024:
+        sport = int(RandShort())
+    l4 = (TCP(sport=sport, dport=job['dp']))
+    if ':' in job['dip']:
+        ip = IPv6(src=self.source[1], dst=job['dip'])
+    else:
+        ip = IP(src=self.source[0], dst=job['dip'])
+    if seq == 1:
+        ip.flags = 'evil'
+    return ip/l4
+\end{lstlisting}
 \end{frame}
 
-\begin{frame}
+\begin{frame}[fragile]
 \frametitle{PATHspider Plugins}
-\framesubtitle{Testing Packet Forging}
-\todo{Write this}
-\end{frame}
-
-\begin{frame}
-\frametitle{PATHspider Plugins}
-\framesubtitle{The Observer}
-\todo{Write this}
-\end{frame}
-
-\begin{frame}
-\frametitle{PATHspider Plugins}
-\framesubtitle{Library Observer Functions}
-\todo{Write this}
-\end{frame}
-
-\begin{frame}
-\frametitle{PATHspider Plugins}
-\framesubtitle{Observing the Evil Bit}
-\todo{Write this}
-\end{frame}
-
-\begin{frame}
-\frametitle{PATHspider Plugins}
-\framesubtitle{Putting it Together}
-\todo{Write this}
-\end{frame}
-
-\begin{frame}
-\frametitle{PATHspider Plugins}
-\framesubtitle{Adding a Flow Combiner}
-\todo{Write this}
-\end{frame}
-
-\begin{frame}
-\frametitle{PATHspider Plugins}
-\framesubtitle{Running it For Real}
-\todo{Write this}
+\framesubtitle{Spidering With the Evil Bit}
+\begin{lstlisting}[caption={Running the Evil Bit Plugin}]
+./run.sh
+\end{lstlisting}
 \end{frame}
 
 \begin{frame}
 \frametitle{Target Lists}
 \framesubtitle{Types of Targets}
-\todo{Write this}
+\begin{itemize}
+\item{Popular - Cisco Umbrella, Alexa Topsites}
+\item{Curated Lists - CitizenLab}
+\item{Random - massscan}
+\end{itemize}
 \end{frame}
 
 \begin{frame}[fragile]
@@ -728,30 +840,18 @@ irl@z~$ hellfire --cisco
 \end{lstlisting}
 \end{frame}
 
-\begin{frame}
-\frametitle{Target Lists}
-\framesubtitle{Using \textit{canid} for Additional Information}
-\todo{Write this}
-\end{frame}
-
-\begin{frame}
-\frametitle{Target Lists}
-\framesubtitle{Resolving for Real}
-\todo{Write this}
-\end{frame}
-
-\begin{frame}
+\begin{frame}[fragile]
 \frametitle{Explicit Congestion Notification}
 \framesubtitle{Using the Built-In Plugin}
-\todo{Write this}
+\begin{lstlisting}[caption={Start Resolving the Cisco Umbrella List}]
+irl@z~$ pspdr measure -i enp0s3 ecn \
+        < ~/pathspider-evilbit/targets.ndjson \
+        > ~/ecn-results.ndjson
+\end{lstlisting}
 \end{frame}
 
 \begin{frame}
-\frametitle{Simple Analysis with PATHspider}
-\end{frame}
-
-\begin{frame}
-\frametitle{More Complex Analysis}
+\frametitle{Results Analysis}
 \begin{center}
 {\LARGE Up next: \\
 Path Transparency Observatory (PTO)} \\

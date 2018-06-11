@@ -1,15 +1,7 @@
-\frametitle{Target Lists}
-\framesubtitle{Using \textit{hellfire}}
-\begin{lstlisting}[caption={\textit{hellfire}'s Usage Help}]
-irl@z:~$ hellfire
-Usage:
-  hellfire --topsites [--file=<filename>] [--output=<individual|array|oneeach>] [--type=<host|ns|mx>] [--canid=<canid address>]
-  hellfire --cisco [--file=<filename>] [--output=<individual|array|oneeach>] [--type=<host|ns|mx>] [--canid=<canid address>]
-  hellfire --citizenlab [--country=<cc>|--file=<filename>] [--output=<individual|array|oneeach>] [--type=<host|ns|mx>] [--canid=<canid address>]
-  hellfire --opendns [--list=<name>|--file=<filename>] [--output=<individual|array|oneeach>] [--type=<host|ns|mx>] [--canid=<canid address>]
-  hellfire --csv --file=<filename> [--output=<individual|array|oneeach>] [--type=<host|ns|mx>] [--canid=<canid address>]
-  hellfire --txt --file=<filename> [--output=<individual|array|oneeach>] [--type=<host|ns|mx>] [--canid=<canid address>]
-\end{lstlisting}
+\frametitle{Explicit Congestion Notification}
+\framesubtitle{Using the Built-In Plugin}
 \begin{lstlisting}[caption={Start Resolving the Cisco Umbrella List}]
-irl@z~$ hellfire --cisco
+irl@z~$ pspdr measure -i enp0s3 ecn \
+        < ~/pathspider-evilbit/targets.ndjson \
+        > ~/ecn-results.ndjson
 \end{lstlisting}
