@@ -10,23 +10,6 @@ S.~Bellovin.
 \newblock {The Security Flag in the IPv4 Header}.
 \newblock RFC 3514 (Informational), April 2003.
 
-\bibitem{rfc7011}
-B.~Claise, B.~Trammell, and P.~Aitken.
-\newblock {Specification of the IP Flow Information Export (IPFIX) Protocol for
-  the Exchange of Flow Information}.
-\newblock RFC 7011 (Internet Standard), September 2013.
-
-\bibitem{UsableMTU2018}
-Ana Custura, Gorry Fairhurst, and Iain Learmonth.
-\newblock {Exploring usable path MTU in the Internet}.
-\newblock In {\em Proceedings of the 2018 Network Traffic Measurement and
-  Analysis Conference (TMA '18)}. IEEE, Jun 2018.
-
-\bibitem{rfc5841}
-R.~Hay and W.~Turkal.
-\newblock {TCP Option to Denote Packet Mood}.
-\newblock RFC 5841 (Informational), April 2010.
-
 \bibitem{PAM2013}
 Mirja K{\"u}hlewind, Sebastian Neuner, and Brian Trammell.
 \newblock {On the state of ECN and TCP options on the Internet}.
